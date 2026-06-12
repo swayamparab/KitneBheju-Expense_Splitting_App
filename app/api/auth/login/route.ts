@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     try {
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 
-        const { success } = await loginRateLimit.limit(`login:${ip}`)
+        const { success } = await loginRateLimit.limit(`kb:login:${ip}`)
 
         if (!success) {
             return NextResponse.json({

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest,
 
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 
-        const { success } = await joinGroupRateLimit.limit(ip);
+        const { success } = await joinGroupRateLimit.limit(`kb:invite:${ip}`);
 
         if (!success) {
             return NextResponse.json({
