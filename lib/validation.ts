@@ -38,3 +38,9 @@ export const createExpenseSchema = z.object({
         .array(z.string())
         .min(1),
 });
+
+export const updateExpenseSchema = z.object({
+    title: z.string().min(1).max(100),
+
+    amount: z.number().positive(),
+});
