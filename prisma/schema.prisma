@@ -8,42 +8,79 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  email     String   @unique
-  password  String
+  id       String @id @default(cuid())
+  username String @unique
+  email    String @unique
+  password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   memberships GroupMember[]
-  ownedGroups Group[] @relation("GroupOwner")
+  ownedGroups Group[]       @relation("GroupOwner")
+
+  expensesPaid Expense[] @relation("ExpensePayer")
+
+  expenseParticipations ExpenseParticipant[]
 }
 
 model Group {
-  id         String   @id @default(cuid())
-  name       String
+  id   String @id @default(cuid())
+  name String
 
-  ownerId    String
-  owner      User @relation("GroupOwner", fields: [ownerId], references: [id])
+  ownerId String
+  owner   User   @relation("GroupOwner", fields: [ownerId], references: [id])
 
   inviteCode String @unique
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  members    GroupMember[]
+  members GroupMember[]
+
+  expenses Expense[]
 }
 
 model GroupMember {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  groupId   String
+  userId  String
+  groupId String
 
-  user      User @relation(fields: [userId], references: [id])
-  group     Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
 
-  joinedAt  DateTime @default(now())
+  joinedAt DateTime @default(now())
 
   @@unique([userId, groupId])
+}
+
+model Expense {
+  id String @id @default(cuid())
+
+  title  String
+  amount Float
+
+  groupId  String
+  paidById String
+
+  group Group @relation(fields: [groupId], references: [id])
+
+  paidBy User @relation("ExpensePayer", fields: [paidById], references: [id])
+
+  participants ExpenseParticipant[]
+
+  createdAt DateTime @default(now())
+}
+
+model ExpenseParticipant {
+  id String @id @default(cuid())
+
+  expenseId String
+  userId    String
+
+  expense Expense @relation(fields: [expenseId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([expenseId, userId])
 }
