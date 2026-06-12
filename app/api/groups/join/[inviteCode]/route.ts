@@ -1,12 +1,24 @@
 import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { joinGroupRateLimit } from "@/lib/ratelimit";
 
 //join a group through invite code
 export async function POST(request: NextRequest,
     { params }: { params: Promise<{ inviteCode: string }> }
 ) {
     try {
+
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+
+        const { success } = await joinGroupRateLimit.limit(ip);
+
+        if (!success) {
+            return NextResponse.json({
+                message: "Too many attempts"
+            }, { status: 429 })
+        }
+
         const userId = await getUserFromToken();
 
         const { inviteCode } = await params;

@@ -3,9 +3,20 @@ import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validation";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
+import { loginRateLimit } from "@/lib/ratelimit";
 
-export async function POST(request:NextRequest) {
-    try{
+export async function POST(request: NextRequest) {
+    try {
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+
+        const { success } = await loginRateLimit.limit(`login:${ip}`)
+
+        if (!success) {
+            return NextResponse.json({
+                message: "Too many login attempts"
+            }, { status: 429 })
+        }
+
         const body = await request.json();
 
         const validatedData = loginSchema.parse(body);
@@ -13,24 +24,24 @@ export async function POST(request:NextRequest) {
         const user = await prisma.user.findFirst({
             where: {
                 OR: [
-                    {username: validatedData.identifier},
-                    {email: validatedData.identifier}
+                    { username: validatedData.identifier },
+                    { email: validatedData.identifier }
                 ]
             }
         })
 
-        if(!user){
+        if (!user) {
             return NextResponse.json({
                 message: "Invalid Credentials"
-            }, {status: 400})
+            }, { status: 400 })
         }
 
         const isPasswordCorrect = await bcrypt.compare(validatedData.password, user.password);
 
-        if(!isPasswordCorrect){
+        if (!isPasswordCorrect) {
             return NextResponse.json({
                 message: "Invalid Credentials"
-            }, {status: 401})
+            }, { status: 401 })
         }
 
         const token = generateToken(user.id);
@@ -42,7 +53,7 @@ export async function POST(request:NextRequest) {
                 username: user.username,
                 email: user.email
             }
-        }, {status: 201})
+        }, { status: 201 })
 
         response.cookies.set("token", token, {
             httpOnly: true,
@@ -54,10 +65,10 @@ export async function POST(request:NextRequest) {
 
         return response;
     }
-    catch(err){
+    catch (err) {
         return NextResponse.json({
             message: "Login failed",
             err
-        }, {status: 400})
+        }, { status: 400 })
     }
 }

@@ -3,10 +3,21 @@ import { signupSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs"
 import { generateToken } from "@/lib/auth";
+import { signupRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request: NextRequest) {
 
     try {
+
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+
+        const { success } = await signupRateLimit.limit(`signup:${ip}`)
+
+        if (!success) {
+            return NextResponse.json({
+                message: "Too many signup attempts"
+            }, { status: 429 })
+        }
         const body = await request.json();
 
         const validatedData = signupSchema.parse(body);
@@ -58,10 +69,10 @@ export async function POST(request: NextRequest) {
         return response;
 
     }
-    catch(err){
+    catch (err) {
         return NextResponse.json({
             message: "signup failed",
             err
-        }, {status: 400})
+        }, { status: 400 })
     }
 }
