@@ -107,15 +107,66 @@ export async function GET(request: NextRequest,
             })
         );
 
-        return NextResponse.json({
-            message: "Balances fetched successfully",
-            balances: result
-        }, { status: 200 })
+        const creditors = result
+            .filter((user) => user.balance > 0)
+            .map((user) => ({ ...user }));
+
+        const debtors = result
+            .filter((user) => user.balance < 0)
+            .map((user) => ({ ...user }));
+
+        const settlements: {
+            fromUserId: string;
+            from: string;
+            toUserId: string;
+            to: string;
+            amount: number;
+        }[] = [];
+
+        let i = 0;
+        let j = 0;
+
+        while (i < debtors.length && j < creditors.length) {
+            const debtor = debtors[i];
+            const creditor = creditors[j];
+
+            const amount = Math.min(
+                Math.abs(debtor.balance),
+                creditor.balance
+            );
+
+            settlements.push({
+                fromUserId: debtor.userId,
+                from: debtor.username,
+                toUserId: creditor.userId,
+                to: creditor.username,
+                amount: Number(amount.toFixed(2)),
+            });
+
+            debtor.balance += amount;
+            creditor.balance -= amount;
+
+            if (Math.abs(debtor.balance) < 0.01) {
+                i++;
+            }
+
+            if (Math.abs(creditor.balance) < 0.01) {
+                j++;
+            }
+        }
+
+        return NextResponse.json(
+            {
+                message: "Settlements fetched successfully",
+                settlements,
+            },
+            { status: 200 }
+        );
 
     }
     catch (err) {
         return NextResponse.json({
-            message: "Error fetching balance",
+            message: "Error fetching settlements",
             err
         }, { status: 500 })
     }

@@ -99,7 +99,8 @@ export async function POST(request: NextRequest,
     }
     catch (err) {
         return NextResponse.json({
-            message: "expense creation failed"
+            message: "expense creation failed",
+            err
         }, { status: 500 })
     }
 }
