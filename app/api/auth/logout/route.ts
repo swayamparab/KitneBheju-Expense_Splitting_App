@@ -1,26 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  try {
+    const response = NextResponse.redirect(
+      new URL("/login", request.url)
+    );
 
-    try {
-        const response = NextResponse.json({
-            message: "User logged out successfully"
-        }, { status: 200 })
+    response.cookies.set("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
 
-        response.cookies.set("token", "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-            maxAge: 0,
-        })
-
-        return response;
-    }
-    catch (err) {
-        return NextResponse.json({
-            message: "logout failed",
-            err
-        })
-    }
+    return response;
+  } catch (err) {
+    return NextResponse.json(
+      {
+        message: "logout failed",
+        err,
+      },
+      { status: 500 }
+    );
+  }
 }

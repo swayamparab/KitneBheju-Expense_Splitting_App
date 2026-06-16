@@ -9,7 +9,7 @@ export async function getUserFromToken() {
 
     const token = cookieStore.get("token")?.value;
 
-    if(!token){
+    if (!token) {
         throw new Error("Unauthorized");
     }
 
@@ -18,7 +18,7 @@ export async function getUserFromToken() {
     return decoded.userId;
 }
 
-export async function getCurrentUser(){
+export async function getCurrentUser() {
     const userId = await getUserFromToken();
 
     const user = await prisma.user.findFirst({
@@ -27,9 +27,31 @@ export async function getCurrentUser(){
         }
     })
 
-    if(!user){
+    if (!user) {
         throw new Error("user not found")
     }
 
     return user;
+}
+
+export async function getOptionalUser() {
+    const token = (await cookies()).get("token")?.value;
+
+    if (!token) {
+        return null;
+    }
+
+    try {
+        const decoded = verifyToken(token);
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId,
+            },
+        });
+
+        return user;
+    } catch {
+        return null;
+    }
 }
