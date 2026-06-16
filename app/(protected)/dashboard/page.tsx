@@ -1,54 +1,11 @@
-"use client"
+import { getCurrentUser, getUserFromToken } from "@/lib/auth-helpers";
+import { getUserGroups } from "@/lib/services/groups";
 
-import { useQuery } from "@tanstack/react-query";
+export default async function DashboardPage() {
 
-type Group = {
-    id: string;
-    name: string;
-    inviteCode: string;
-    _count: {
-        members: number;
-    };
-};
+    const user = await getCurrentUser();
 
-export default function DashboardPage() {
-
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["groups"],
-        queryFn: async () => {
-            const res = await fetch("/api/groups")
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "failed to fetch groups")
-            }
-
-            return data
-        }
-    })
-
-    if (isLoading) {
-        return (
-            <div className="p-6">
-                <h1 className="text-3xl font-bold">Dashboard</h1>
-                <p>Loading groups...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-6">
-                <h1 className="text-3xl font-bold">Dashboard</h1>
-                <p>Failed to load groups.</p>
-            </div>
-        );
-    }
-
-    const groups: Group[] = data.groups;
-
-    console.log(data)
+    const groups = await getUserGroups(user.id);
 
     return (
         <div className="p-6">
@@ -68,6 +25,7 @@ export default function DashboardPage() {
                 </div>
             ) : (
                 <div className="space-y-3">
+                    <h1>{user.username}</h1>
                     {groups.map((group) => (
                         <div
                             key={group.id}

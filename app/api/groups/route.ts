@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
 }
 
 //get all groups of logged in user
+//not using in frontend since took the approach of service layer + server components
 export async function GET() {
 
     try {
