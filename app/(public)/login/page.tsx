@@ -10,6 +10,7 @@ import type { z } from "zod";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -55,7 +56,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-md space-y-4">
         <div>
           <h1 className="text-3xl font-bold">Login</h1>
         </div>
@@ -99,6 +100,15 @@ export default function LoginPage() {
             {isSubmitting ? "Logging in..." : "Login"}
           </Button>
         </form>
+        <p className="text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link
+            href="/signup"
+            className="text-emerald-700 hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
       </div>
     </main>
   );

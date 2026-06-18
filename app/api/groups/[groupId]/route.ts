@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { error } from "node:console";
 
 //get info of a particular group
+//not used in frontend since services is created for this GET
 export async function GET(request: NextRequest,
     { params }: { params: Promise<{ groupId: string }> }
 ) {

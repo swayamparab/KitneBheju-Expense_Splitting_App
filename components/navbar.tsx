@@ -6,11 +6,11 @@ export default async function Navbar() {
   const user = await getOptionalUser();
 
   return (
-    <nav className="border-b bg-background">
+    <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link
           href={user ? "/dashboard" : "/"}
-          className="text-xl font-bold text-emerald-600"
+          className="text-xl font-bold tracking-tight text-emerald-700"
         >
           KitneBheju
         </Link>
@@ -20,19 +20,21 @@ export default async function Navbar() {
             <>
               <Link
                 href="/dashboard"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
               >
                 Dashboard
               </Link>
 
-              <span className="text-sm text-muted-foreground">
+              <div className="h-5 w-px bg-slate-200" />
+
+              <span className="text-sm font-medium text-slate-600">
                 {user.username}
               </span>
 
               <form action="/api/auth/logout" method="POST">
                 <button
                   type="submit"
-                  className="text-sm font-medium text-red-500 hover:text-red-600"
+                  className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
                 >
                   Logout
                 </button>
@@ -42,14 +44,14 @@ export default async function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
               >
                 Login
               </Link>
 
               <Link
-                href="/register"
-                className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                href="/signup"
+                className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800"
               >
                 Register
               </Link>

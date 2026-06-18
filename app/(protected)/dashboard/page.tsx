@@ -6,6 +6,8 @@ import { getUserGroups } from "@/lib/services/groups";
 import CreateGroupDialog from "@/components/create-group-dialog";
 import JoinGroupDialog from "@/components/join-group-dialog";
 
+import Link from "next/link";
+
 export default async function DashboardPage() {
     const user = await getCurrentUser();
 
@@ -58,32 +60,38 @@ export default async function DashboardPage() {
                     ) : (
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                             {groups.map((group) => (
-                                <div
+                                <Link
                                     key={group.id}
-                                    className="cursor-pointer rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                                    href={`/groups/${group.id}`}
+                                    className="block"
                                 >
-                                    <div className="mb-4">
-                                        <h3 className="text-lg font-semibold text-slate-800">
-                                            {group.name}
-                                        </h3>
-                                    </div>
+                                    <div
+                                        key={group.id}
+                                        className="cursor-pointer rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                                    >
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-slate-800">
+                                                {group.name}
+                                            </h3>
+                                        </div>
 
-                                    <div className="space-y-2 text-sm text-slate-500">
-                                        <p>
-                                            <span className="font-medium text-slate-700">
-                                                Invite Code:
-                                            </span>{" "}
-                                            {group.inviteCode}
-                                        </p>
+                                        <div className="space-y-2 text-sm text-slate-500">
+                                            <p>
+                                                <span className="font-medium text-slate-700">
+                                                    Invite Code:
+                                                </span>{" "}
+                                                {group.inviteCode}
+                                            </p>
 
-                                        <p>
-                                            <span className="font-medium text-slate-700">
-                                                Members:
-                                            </span>{" "}
-                                            {group._count.members}
-                                        </p>
+                                            <p>
+                                                <span className="font-medium text-slate-700">
+                                                    Members:
+                                                </span>{" "}
+                                                {group._count.members}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}
