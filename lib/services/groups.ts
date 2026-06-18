@@ -23,7 +23,7 @@ export async function getGroup(
   groupId: string,
   userId: string
 ) {
-  
+
   const membership = await prisma.groupMember.findUnique({
     where: {
       userId_groupId: {
@@ -73,4 +73,49 @@ export async function getGroup(
   }
 
   return group;
+}
+
+export async function getGroupExpenses(
+  groupId: string,
+  userId: string
+) {
+  const membership = await prisma.groupMember.findUnique({
+    where: {
+      userId_groupId: {
+        userId,
+        groupId,
+      },
+    },
+  });
+
+  if (!membership) {
+    throw new Error("Forbidden");
+  }
+
+  return prisma.expense.findMany({
+    where: {
+      groupId,
+    },
+    include: {
+      paidBy: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      participants: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 }
