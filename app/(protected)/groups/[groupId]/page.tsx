@@ -18,7 +18,7 @@ export default async function GroupPage({
     return (
       <div className="space-y-8">
         {/* Hero */}
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-emerald-600 p-8 text-white shadow-lg">
+        <div className="rounded-3xl bg-linear-to-r from-emerald-700 to-emerald-600 p-8 text-white shadow-lg">
           <h1 className="text-4xl font-bold">
             {group.name}
           </h1>
