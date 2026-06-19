@@ -15,6 +15,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { getUserFromToken } from "@/lib/auth-helpers";
 
 type Member = {
     user: {
@@ -26,11 +27,13 @@ type Member = {
 interface AddExpenseDialogProps {
     groupId: string;
     members: Member[];
+    currentUserId: string;
 }
 
 export default function AddExpenseDialog({
     groupId,
     members,
+    currentUserId
 }: AddExpenseDialogProps) {
     const router = useRouter();
 
@@ -131,28 +134,30 @@ export default function AddExpenseDialog({
                         </p>
 
                         <div className="space-y-2">
-                            {members.map((member) => (
-                                <label
-                                    key={member.user.id}
-                                    className="flex items-center gap-2"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={participantIds.includes(
-                                            member.user.id
-                                        )}
-                                        onChange={() =>
-                                            toggleParticipant(
+                            {members
+                                .filter(
+                                    (member) => member.user.id !== currentUserId
+                                )
+                                .map((member) => (
+                                    <label
+                                        key={member.user.id}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={participantIds.includes(
                                                 member.user.id
-                                            )
-                                        }
-                                    />
+                                            )}
+                                            onChange={() =>
+                                                toggleParticipant(member.user.id)
+                                            }
+                                        />
 
-                                    <span>
-                                        {member.user.username}
-                                    </span>
-                                </label>
-                            ))}
+                                        <span>
+                                            {member.user.username}
+                                        </span>
+                                    </label>
+                                ))}
                         </div>
                     </div>
 

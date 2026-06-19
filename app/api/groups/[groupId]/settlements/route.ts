@@ -2,6 +2,7 @@ import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+//not used in frontend since service is created getGroupSettlements
 export async function GET(request: NextRequest,
     { params }: { params: Promise<{ groupId: string }> }
 ) {

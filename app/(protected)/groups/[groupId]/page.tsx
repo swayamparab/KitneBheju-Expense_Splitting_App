@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { getCurrentUser } from "@/lib/auth-helpers";
-import { getGroup, getGroupExpenses } from "@/lib/services/groups";
+import { getCurrentUser, getUserFromToken } from "@/lib/auth-helpers";
+import { getGroup, getGroupBalances, getGroupExpenses, getGroupSettlements } from "@/lib/services/groups";
 
 import AddExpenseDialog from "@/components/add-expense-dialog";
+
+import { ArrowRight } from "lucide-react";
 
 export default async function GroupPage({
   params,
@@ -12,12 +14,16 @@ export default async function GroupPage({
 }) {
   const { groupId } = await params;
 
-  const user = await getCurrentUser();
+  const userId = await getUserFromToken();
 
   try {
-    const group = await getGroup(groupId, user.id);
+    const group = await getGroup(groupId, userId);
 
-    const expenses = await getGroupExpenses(groupId, user.id);
+    const expenses = await getGroupExpenses(groupId, userId);
+
+    const balances = await getGroupBalances(groupId, userId);
+
+    const settlements = await getGroupSettlements(groupId, userId);
 
     return (
       <div className="space-y-3">
@@ -35,6 +41,7 @@ export default async function GroupPage({
         <AddExpenseDialog
           groupId={group.id}
           members={group.members}
+          currentUserId={userId}
         />
         {/* Stats */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -69,31 +76,7 @@ export default async function GroupPage({
           </div>
         </div>
 
-        {/* Members */}
-        <div className="rounded-2xl bg-white p-3 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-800">
-              Members
-            </h2>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            {group.members.map((member) => (
-              <div
-                key={member.user.id}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-                <p className="font-semibold text-slate-800">
-                  {member.user.username}
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  {member.user.email}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Expenses */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="mb-6 text-2xl font-bold text-slate-800">
             Expenses
@@ -117,7 +100,7 @@ export default async function GroupPage({
                       {expense.title}
                     </h3>
 
-                    <span className="text-lg font-bold text-emerald-700">
+                    <span className="text-lg font-bold text-slate-700">
                       ₹{expense.amount}
                     </span>
                   </div>
@@ -145,6 +128,112 @@ export default async function GroupPage({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Settlements */}
+        <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-xl font-bold text-slate-800">
+            Settlements
+          </h2>
+
+          {settlements.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-4 text-center">
+              <p className="text-slate-500">
+                Everyone is settled up 🎉
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {settlements.map((settlement, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-xl border p-4 transition hover:bg-slate-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium text-slate-800">
+                      {settlement.from}
+                    </span>
+
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
+
+                    <span className="font-medium text-slate-800">
+                      {settlement.to}
+                    </span>
+                  </div>
+
+                  <span className="font-bold text-slate-600">
+                    ₹{settlement.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Balances */}
+        <div className="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-xl font-bold text-slate-800">
+            Balances
+          </h2>
+
+          {balances.length === 0 ? (
+            <p className="text-slate-500">
+              No balances yet
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {balances.map((balance) => (
+                <div
+                  key={balance.userId}
+                  className="flex items-center justify-between rounded-xl border p-3"
+                >
+                  <span className="font-medium">
+                    {balance.username}
+                  </span>
+
+                  <span
+                    className={`font-semibold ${balance.balance > 0
+                      ? "text-green-600"
+                      : balance.balance < 0
+                        ? "text-red-600"
+                        : "text-slate-500"
+                      }`}
+                  >
+                    {balance.balance > 0 ? "+" : ""}
+                    ₹{balance.balance}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+
+
+        {/* Members */}
+        <div className="rounded-2xl bg-white p-3 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800">
+              Members
+            </h2>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {group.members.map((member) => (
+              <div
+                key={member.user.id}
+                className="rounded-xl border border-slate-200 p-4"
+              >
+                <p className="font-semibold text-slate-800">
+                  {member.user.username}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  {member.user.email}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

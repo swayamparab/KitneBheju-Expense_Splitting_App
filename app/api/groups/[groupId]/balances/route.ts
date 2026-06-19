@@ -2,6 +2,7 @@ import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+//not used in frontend since a service is created of getGroupBalance
 export async function GET(request: NextRequest,
     { params }: { params: Promise<{ groupId: string }> }
 ) {
@@ -10,18 +11,6 @@ export async function GET(request: NextRequest,
         const userId = await getUserFromToken();
 
         const { groupId } = await params;
-
-        const group = await prisma.group.findUnique({
-            where: {
-                id: groupId
-            }
-        })
-
-        if (!group) {
-            return NextResponse.json({
-                message: "Group not found"
-            }, { status: 404 })
-        }
 
         const membership = await prisma.groupMember.findUnique({
             where: {
