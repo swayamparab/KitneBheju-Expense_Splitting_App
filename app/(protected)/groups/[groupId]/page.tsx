@@ -98,9 +98,11 @@ export default async function GroupPage({
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-slate-800">
                       {expense.title}
+                
                     </h3>
 
                     <span className="text-lg font-bold text-slate-700">
+                    
                       ₹{expense.amount}
                     </span>
                   </div>
@@ -109,6 +111,10 @@ export default async function GroupPage({
                     Paid by{" "}
                     <span className="font-medium text-slate-700">
                       {expense.paidBy.username}
+                    </span>
+                    {" "}on {" "}
+                    <span className="font-medium text-slate-700">
+                      {expense.createdAt.toLocaleString()}
                     </span>
                   </p>
 
