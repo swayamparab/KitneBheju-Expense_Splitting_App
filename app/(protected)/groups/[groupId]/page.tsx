@@ -5,7 +5,11 @@ import { getGroup, getGroupBalances, getGroupExpenses, getGroupSettlements } fro
 
 import AddExpenseDialog from "@/components/add-expense-dialog";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import DeleteGroupButton from "@/components/delete-group-button";
+import DeleteExpenseButton from "@/components/delete-expense-button";
 
 export default async function GroupPage({
   params,
@@ -29,13 +33,22 @@ export default async function GroupPage({
       <div className="space-y-3">
         {/* Hero */}
         <div className="rounded-3xl bg-linear-to-r from-emerald-700 to-emerald-600 p-8 text-white shadow-lg">
-          <h1 className="text-4xl font-bold">
-            {group.name}
-          </h1>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold">
+                {group.name}
+              </h1>
 
-          <p className="mt-2 text-emerald-100">
-            Invite Code: {group.inviteCode}
-          </p>
+              <p className="mt-2 text-emerald-100">
+                Invite Code: {group.inviteCode}
+              </p>
+            </div>
+
+            {group.owner.id === userId && (
+              <DeleteGroupButton groupId={groupId} />
+            )}
+
+          </div>
         </div>
 
         <AddExpenseDialog
@@ -95,16 +108,24 @@ export default async function GroupPage({
                   key={expense.id}
                   className="rounded-xl border p-4 transition hover:shadow-sm"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <h3 className="font-semibold text-slate-800">
                       {expense.title}
-                
                     </h3>
 
-                    <span className="text-lg font-bold text-slate-700">
-                    
-                      ₹{expense.amount}
-                    </span>
+                    <div className="flex flex-col items-end">
+                      <div className="h-8">
+                        {expense.paidBy.id === userId && (
+                          <DeleteExpenseButton
+                            expenseId={expense.id}
+                          />
+                        )}
+                      </div>
+
+                      <span className="text-lg font-bold text-slate-700">
+                        ₹{expense.amount}
+                      </span>
+                    </div>
                   </div>
 
                   <p className="mt-2 text-sm text-slate-500">
@@ -145,7 +166,7 @@ export default async function GroupPage({
           {settlements.length === 0 ? (
             <div className="rounded-xl border border-dashed p-4 text-center">
               <p className="text-slate-500">
-                Everyone is settled up 🎉
+                Everyone is settled up.
               </p>
             </div>
           ) : (
