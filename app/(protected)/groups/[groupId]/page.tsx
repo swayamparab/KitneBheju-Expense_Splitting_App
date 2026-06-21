@@ -46,10 +46,10 @@ export default async function GroupPage({
               </h1>
 
               <div className="flex column">
-              <p className="text-emerald-100">
-                Invite Code: {group.inviteCode}
-              </p>
-              <CopyInviteLinkButton inviteCode={group.inviteCode} />
+                <p className="text-emerald-100">
+                  Invite Code: {group.inviteCode}
+                </p>
+                <CopyInviteLinkButton inviteCode={group.inviteCode} />
 
               </div>
             </div>
@@ -145,7 +145,22 @@ export default async function GroupPage({
                     </span>
                     {" "}on {" "}
                     <span className="font-medium text-slate-700">
-                      {expense.createdAt.toLocaleString()}
+                      {new Date(expense.createdAt).toLocaleDateString(
+                        "en-IN",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+                      {" at "}
+                      {new Date(expense.createdAt).toLocaleTimeString(
+                        "en-IN",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
                     </span>
                   </p>
 
