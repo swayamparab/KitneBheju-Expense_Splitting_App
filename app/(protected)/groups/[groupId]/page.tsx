@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import DeleteGroupButton from "@/components/delete-group-button";
 import DeleteExpenseButton from "@/components/delete-expense-button";
+import { useId } from "react";
 
 export default async function GroupPage({
   params,
@@ -21,13 +22,17 @@ export default async function GroupPage({
   const userId = await getUserFromToken();
 
   try {
-    const group = await getGroup(groupId, userId);
-
-    const expenses = await getGroupExpenses(groupId, userId);
-
-    const balances = await getGroupBalances(groupId, userId);
-
-    const settlements = await getGroupSettlements(groupId, userId);
+    const [
+      group,
+      expenses,
+      balances,
+      settlements,
+    ] = await Promise.all([
+      getGroup(groupId, userId),
+      getGroupExpenses(groupId, userId),
+      getGroupBalances(groupId, userId),
+      getGroupSettlements(groupId, userId),
+    ]);
 
     return (
       <div className="space-y-3">
