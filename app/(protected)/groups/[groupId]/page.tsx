@@ -145,22 +145,18 @@ export default async function GroupPage({
                     </span>
                     {" "}on {" "}
                     <span className="font-medium text-slate-700">
-                      {new Date(expense.createdAt).toLocaleDateString(
-                        "en-IN",
-                        {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        }
-                      )}
+                      {new Intl.DateTimeFormat("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      }).format(expense.createdAt)}
                       {" at "}
-                      {new Date(expense.createdAt).toLocaleTimeString(
-                        "en-IN",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
+                      {new Intl.DateTimeFormat("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).format(expense.createdAt)}
                     </span>
                   </p>
 
