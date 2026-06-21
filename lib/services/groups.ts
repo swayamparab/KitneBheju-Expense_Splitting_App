@@ -276,3 +276,30 @@ export async function getGroupSettlements(groupId: string, userId: string) {
 
   return settlements;
 }
+
+export async function getGroupByInviteCode(
+  inviteCode: string
+) {
+  return prisma.group.findUnique({
+    where: {
+      inviteCode,
+    },
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          members: true,
+        },
+      },
+    },
+  });
+}

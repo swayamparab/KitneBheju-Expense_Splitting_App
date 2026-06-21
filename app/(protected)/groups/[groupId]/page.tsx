@@ -10,7 +10,8 @@ import { toast } from "sonner";
 
 import DeleteGroupButton from "@/components/delete-group-button";
 import DeleteExpenseButton from "@/components/delete-expense-button";
-import { useId } from "react";
+
+import CopyInviteLinkButton from "@/components/copy-invite-link-button";
 
 export default async function GroupPage({
   params,
@@ -44,9 +45,13 @@ export default async function GroupPage({
                 {group.name}
               </h1>
 
-              <p className="mt-2 text-emerald-100">
+              <div className="flex column">
+              <p className="text-emerald-100">
                 Invite Code: {group.inviteCode}
               </p>
+              <CopyInviteLinkButton inviteCode={group.inviteCode} />
+
+              </div>
             </div>
 
             {group.owner.id === userId && (
