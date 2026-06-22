@@ -11,6 +11,13 @@ export default function DeleteGroupButton(
 
     const handleDeleteGroup = async () => {
         try {
+
+            const confirmed = window.confirm("Are you sure you want to delete the group?")
+
+            if(!confirmed){
+                return;
+            }
+
             const res = await fetch(`/api/groups/${groupId}`, {
                 method: "DELETE"
             })
