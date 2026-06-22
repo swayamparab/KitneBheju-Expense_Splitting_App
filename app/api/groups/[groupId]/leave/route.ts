@@ -1,5 +1,6 @@
 import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { getGroupBalances } from "@/lib/services/groups";
 import { NextResponse } from "next/server";
 
 //leave a group
@@ -27,7 +28,7 @@ export async function DELETE(
         if (group.ownerId === userId) {
             return NextResponse.json({
                 message: "Group owner cannot leave",
-            }, { status: 400 })
+            }, { status: 403 })
         }
 
         const membership = await prisma.groupMember.findUnique({
@@ -41,8 +42,24 @@ export async function DELETE(
 
         if (!membership) {
             return NextResponse.json({
-                    message: "you are not part of this group",
-                }, {status: 404})
+                message: "you are not part of this group",
+            }, { status: 404 })
+        }
+
+        const balances = await getGroupBalances(groupId, userId);
+
+        const currentUserBalance = balances.find(
+            (balance) => balance.userId === userId
+        );
+
+        if (
+            currentUserBalance &&
+            Math.abs(currentUserBalance.balance) > 0.01
+        ) {
+            return NextResponse.json({
+                    message:
+                        "Settle your balances before leaving the group",
+                }, {status: 400});
         }
 
         await prisma.groupMember.delete({
@@ -56,11 +73,10 @@ export async function DELETE(
 
         return NextResponse.json({
             message: "group left successfully"
-        })
-    } catch(err) {
+        }, { status: 200 })
+    } catch (err) {
         return NextResponse.json({
-            message: "failed to leave group",
-            err
-        }, {status: 400})
+            message: "failed to leave group"
+        }, { status: 500 })
     }
 }

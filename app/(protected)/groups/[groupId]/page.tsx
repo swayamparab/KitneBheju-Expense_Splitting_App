@@ -5,13 +5,13 @@ import { getGroup, getGroupBalances, getGroupExpenses, getGroupSettlements } fro
 
 import AddExpenseDialog from "@/components/add-expense-dialog";
 
-import { ArrowRight, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight } from "lucide-react";
 
 import DeleteGroupButton from "@/components/delete-group-button";
 import DeleteExpenseButton from "@/components/delete-expense-button";
 
 import CopyInviteLinkButton from "@/components/copy-invite-link-button";
+import LeaveGroupButton from "@/components/leave-group-button";
 
 export default async function GroupPage({
   params,
@@ -54,8 +54,10 @@ export default async function GroupPage({
               </div>
             </div>
 
-            {group.owner.id === userId && (
+            {group.owner.id === userId ? (
               <DeleteGroupButton groupId={groupId} />
+            ) : (
+              <LeaveGroupButton groupId={groupId}/>
             )}
 
           </div>
@@ -285,7 +287,8 @@ export default async function GroupPage({
         </div>
       </div>
     );
-  } catch {
-    notFound();
+  } catch(err) {
+    console.log(err);
+    throw err;
   }
 }
