@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -15,7 +15,10 @@ import Link from "next/link";
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+
   const router = useRouter();
+
+  const searchParams = useSearchParams();
 
   const {
     register,
@@ -43,8 +46,10 @@ export default function LoginPage() {
 
       toast.success(result.message);
 
-      router.push("/dashboard");
+      const redirectTo = searchParams.get("redirect") || "/dashboard";
+      router.push(redirectTo);
       router.refresh();
+
     } catch (error) {
       toast.error(
         error instanceof Error

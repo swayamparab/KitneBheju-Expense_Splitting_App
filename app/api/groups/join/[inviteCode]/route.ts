@@ -1,4 +1,4 @@
-import { getUserFromToken } from "@/lib/auth-helpers";
+import { getOptionalUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { joinGroupRateLimit } from "@/lib/ratelimit";
@@ -19,7 +19,20 @@ export async function POST(request: NextRequest,
             }, { status: 429 })
         }
 
-        const userId = await getUserFromToken();
+        const user = await getOptionalUser();
+
+        if (!user) {
+            return NextResponse.json(
+                {
+                    message: "Please login first"
+                },
+                {
+                    status: 401
+                }
+            );
+        }
+
+        const userId = user.id;
 
         const { inviteCode } = await params;
 

@@ -1,8 +1,6 @@
-import { verify } from "crypto";
 import { cookies } from "next/headers";
 import { verifyToken } from "./auth";
 import { prisma } from "./prisma";
-import { NextResponse } from "next/server";
 
 export async function getUserFromToken() {
     const cookieStore = await cookies();

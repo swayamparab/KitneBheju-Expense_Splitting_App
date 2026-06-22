@@ -15,7 +15,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { getUserFromToken } from "@/lib/auth-helpers";
 
 type Member = {
     user: {
