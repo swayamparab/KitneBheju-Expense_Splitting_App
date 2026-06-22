@@ -14,6 +14,8 @@ import Link from "next/link";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
 
   const router = useRouter();
