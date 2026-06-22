@@ -47,6 +47,8 @@ export default function LoginForm() {
       toast.success(result.message);
 
       const redirectTo = searchParams.get("redirect") || "/dashboard";
+
+      console.log("Redirect: ", redirectTo)
       router.push(redirectTo);
       router.refresh();
 
