@@ -1,7 +1,7 @@
 import { getOptionalUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { joinGroupRateLimit } from "@/lib/ratelimit";
+import { joinGroupRateLimit } from "@/lib/redis";
 
 //join a group through invite code
 export async function POST(request: NextRequest,

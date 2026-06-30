@@ -3,7 +3,7 @@ import { signupSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs"
 import { generateToken } from "@/lib/auth";
-import { signupRateLimit } from "@/lib/ratelimit";
+import { signupRateLimit } from "@/lib/redis";
 
 export async function POST(request: NextRequest) {
 

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validation";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
-import { loginRateLimit } from "@/lib/ratelimit";
+import { loginRateLimit } from "@/lib/redis";
 
 export async function POST(request: NextRequest) {
     try {
