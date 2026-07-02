@@ -1,5 +1,6 @@
 import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
 import { getGroupBalances } from "@/lib/services/groups";
 import { NextResponse } from "next/server";
 
@@ -57,10 +58,19 @@ export async function DELETE(
             Math.abs(currentUserBalance.balance) > 0.01
         ) {
             return NextResponse.json({
-                    message:
-                        "Settle your balances before leaving the group",
-                }, {status: 400});
+                message:
+                    "Settle your balances before leaving the group",
+            }, { status: 400 });
         }
+
+        const members = await prisma.groupMember.findMany({
+            where: {
+                groupId: group.id,
+            },
+            select: {
+                userId: true,
+            },
+        });
 
         await prisma.groupMember.delete({
             where: {
@@ -70,6 +80,10 @@ export async function DELETE(
                 },
             },
         });
+
+        await redis.del(
+            ...members.map((member) => `groups:${member.userId}`)
+        );
 
         return NextResponse.json({
             message: "group left successfully"

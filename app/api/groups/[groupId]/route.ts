@@ -1,5 +1,6 @@
 import { getCurrentUser, getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "node:console";
 
@@ -96,6 +97,15 @@ export async function DELETE(request: NextRequest,
             }, { status: 400 });
         }
 
+        const members = await prisma.groupMember.findMany({
+            where: {
+                groupId: group.id,
+            },
+            select: {
+                userId: true,
+            },
+        });
+
         await prisma.$transaction([
             prisma.groupMember.deleteMany({
                 where: {
@@ -109,6 +119,10 @@ export async function DELETE(request: NextRequest,
                 },
             }),
         ]);
+
+        await Promise.all(
+            members.map((member) => redis.del(`groups:${member.userId}`))
+        );
 
         return NextResponse.json({
             message: "group deleted successfully"

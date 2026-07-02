@@ -1,7 +1,7 @@
 import { getOptionalUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { joinGroupRateLimit } from "@/lib/redis";
+import { joinGroupRateLimit, redis } from "@/lib/redis";
 
 //join a group through invite code
 export async function POST(request: NextRequest,
@@ -67,6 +67,19 @@ export async function POST(request: NextRequest,
                 groupId: group.id
             }
         })
+
+        const members = await prisma.groupMember.findMany({
+            where: {
+                groupId: group.id,
+            },
+            select: {
+                userId: true,
+            },
+        });
+
+        await Promise.all(
+            members.map((member) => redis.del(`groups:${member.userId}`))
+        );
 
         return NextResponse.json({
             message: "joined group successfully"

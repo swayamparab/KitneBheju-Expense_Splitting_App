@@ -1,7 +1,16 @@
 import { prisma } from "@/lib/prisma";
+import { redis } from "../redis";
 
 export async function getUserGroups(userId: string) {
-  return prisma.group.findMany({
+
+  const cacheKey = `groups:${userId}`
+  const cachedGroups = await redis.get(cacheKey);
+
+  if(cachedGroups){
+    return cachedGroups
+  }
+
+  const groups = await prisma.group.findMany({
     where: {
       members: {
         some: {
@@ -17,6 +26,10 @@ export async function getUserGroups(userId: string) {
       },
     },
   });
+
+  await redis.set(cacheKey, groups, {ex: 300});
+
+  return groups;
 }
 
 export async function getGroup(

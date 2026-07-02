@@ -1,5 +1,6 @@
 import { getCurrentUser, getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
 import { createGroupSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,10 +14,10 @@ export async function POST(request: NextRequest) {
         const validatedData = createGroupSchema.parse(body);
 
         const inviteCode = crypto
-                            .randomUUID()
-                            .replace(/-/g, "")
-                            .slice(0, 8)
-                            .toUpperCase();
+            .randomUUID()
+            .replace(/-/g, "")
+            .slice(0, 8)
+            .toUpperCase();
 
         const group = await prisma.group.create({
             data: {
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest) {
                 }
             }
         })
+
+        await redis.del(`groups:${user.id}`)
 
         return NextResponse.json({
             message: "Group created successfully",
