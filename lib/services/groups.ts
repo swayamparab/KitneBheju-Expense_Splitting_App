@@ -12,13 +12,13 @@ type UserGroups = Prisma.GroupGetPayload<{
   };
 }>[];
 
-export async function getUserGroups(userId: string) {
+export async function getUserGroups(userId: string): Promise<UserGroups> {
 
   const cacheKey = `groups:${userId}`
-  const cachedGroups = redis.get<UserGroups>(cacheKey);
-  
-  if(cachedGroups){
-    return cachedGroups
+  const cachedGroups: UserGroups | null = await redis.get<UserGroups>(cacheKey);
+
+  if (cachedGroups !== null) {
+    return cachedGroups;
   }
 
   const groups = await prisma.group.findMany({
@@ -38,7 +38,7 @@ export async function getUserGroups(userId: string) {
     },
   });
 
-  await redis.set(cacheKey, groups, {ex: 300});
+  await redis.set(cacheKey, groups, { ex: 300 });
 
   return groups;
 }
