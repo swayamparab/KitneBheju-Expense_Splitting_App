@@ -1,11 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { redis } from "../redis";
+import { Prisma } from "@prisma/client";
+
+type UserGroups = Prisma.GroupGetPayload<{
+  include: {
+    _count: {
+      select: {
+        members: true;
+      };
+    };
+  };
+}>[];
 
 export async function getUserGroups(userId: string) {
 
   const cacheKey = `groups:${userId}`
-  const cachedGroups = await redis.get(cacheKey);
-
+  const cachedGroups = redis.get<UserGroups>(cacheKey);
+  
   if(cachedGroups){
     return cachedGroups
   }
