@@ -1,5 +1,6 @@
 import { getUserFromToken } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { getGroupExpenses } from "@/lib/services/groups";
 import { createExpenseSchema } from "@/lib/validation";
 import { stat } from "fs";
 import { NextRequest, NextResponse } from "next/server";
@@ -106,65 +107,80 @@ export async function POST(request: NextRequest,
 }
 
 //get all expenses of a particular group
-export async function GET(request: NextRequest,
-    { params }: { params: Promise<{ groupId: string }> }) {
-    try {
-        const userId = await getUserFromToken();
+// export async function GET(request: NextRequest,
+//     { params }: { params: Promise<{ groupId: string }> }) {
+//     try {
+//         const userId = await getUserFromToken();
 
-        const { groupId } = await params;
+//         const { groupId } = await params;
 
-        const membership = await prisma.groupMember.findUnique({
-            where: {
-                userId_groupId: {
-                    userId,
-                    groupId,
-                },
-            },
-        });
+//         const membership = await prisma.groupMember.findUnique({
+//             where: {
+//                 userId_groupId: {
+//                     userId,
+//                     groupId,
+//                 },
+//             },
+//         });
 
-        if (!membership) {
-            return NextResponse.json({
-                message: "you do not have access to this group"
-            }, { status: 403 })
-        }
+//         if (!membership) {
+//             return NextResponse.json({
+//                 message: "you do not have access to this group"
+//             }, { status: 403 })
+//         }
 
-        const expenses = await prisma.expense.findMany({
-            where: {
-                groupId,
-            },
+//         const expenses = await prisma.expense.findMany({
+//             where: {
+//                 groupId,
+//             },
 
-            include: {
-                paidBy: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
-                },
+//             include: {
+//                 paidBy: {
+//                     select: {
+//                         id: true,
+//                         username: true,
+//                     },
+//                 },
 
-                participants: {
-                    include: {
-                        user: {
-                            select: {
-                                id: true,
-                                username: true,
-                            },
-                        },
-                    },
-                },
-            },
+//                 participants: {
+//                     include: {
+//                         user: {
+//                             select: {
+//                                 id: true,
+//                                 username: true,
+//                             },
+//                         },
+//                     },
+//                 },
+//             },
 
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
+//             orderBy: {
+//                 createdAt: "desc",
+//             },
+//         });
 
-        return NextResponse.json({
-            message: "expenses fetched successfully",
-            expenses
-        }, { status: 200 })
-    } catch (err) {
-        return NextResponse.json({
-            message: "failed to fetch expenses"
-        }, { status: 500 })
-    }
+//         return NextResponse.json({
+//             message: "expenses fetched successfully",
+//             expenses
+//         }, { status: 200 })
+//     } catch (err) {
+//         return NextResponse.json({
+//             message: "failed to fetch expenses"
+//         }, { status: 500 })
+//     }
+// }
+
+//get all expenses of a particular group (pagination version)
+export async function GET(request:NextRequest,
+    {params}: {params: Promise<{groupId: string}>}
+) {
+    const {groupId} = await params;
+
+    const userId = await getUserFromToken();
+
+    const cursor = request.nextUrl.searchParams.get("cursor") ?? undefined;
+
+    const data = await getGroupExpenses(groupId, userId, cursor);
+
+    return NextResponse.json(data);
 }

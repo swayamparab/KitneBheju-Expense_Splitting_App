@@ -1,6 +1,4 @@
-import { notFound } from "next/navigation";
-
-import { getCurrentUser, getUserFromToken } from "@/lib/auth-helpers";
+import { getUserFromToken } from "@/lib/auth-helpers";
 import { getGroup, getGroupBalances, getGroupExpenses, getGroupSettlements } from "@/lib/services/groups";
 
 import AddExpenseDialog from "@/components/add-expense-dialog";
@@ -8,10 +6,10 @@ import AddExpenseDialog from "@/components/add-expense-dialog";
 import { ArrowRight } from "lucide-react";
 
 import DeleteGroupButton from "@/components/delete-group-button";
-import DeleteExpenseButton from "@/components/delete-expense-button";
 
 import CopyInviteLinkButton from "@/components/copy-invite-link-button";
 import LeaveGroupButton from "@/components/leave-group-button";
+import ExpensesList from "@/components/expenses-list";
 
 export default async function GroupPage({
   params,
@@ -25,7 +23,7 @@ export default async function GroupPage({
   try {
     const [
       group,
-      expenses,
+      expensesData,
       balances,
       settlements,
     ] = await Promise.all([
@@ -57,7 +55,7 @@ export default async function GroupPage({
             {group.owner.id === userId ? (
               <DeleteGroupButton groupId={groupId} />
             ) : (
-              <LeaveGroupButton groupId={groupId}/>
+              <LeaveGroupButton groupId={groupId} />
             )}
 
           </div>
@@ -86,7 +84,7 @@ export default async function GroupPage({
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-slate-800">
-              {expenses.length}
+              {expensesData.expenses.length}
             </h2>
           </div>
 
@@ -102,83 +100,11 @@ export default async function GroupPage({
         </div>
 
         {/* Expenses */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="mb-6 text-2xl font-bold text-slate-800">
-            Expenses
-          </h2>
-
-          {expenses.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-6 text-center">
-              <p className="text-slate-500">
-                No expenses yet.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {expenses.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="rounded-xl border p-4 transition hover:shadow-sm"
-                >
-                  <div className="flex items-start justify-between">
-                    <h3 className="font-semibold text-slate-800">
-                      {expense.title}
-                    </h3>
-
-                    <div className="flex flex-col items-end">
-                      <div className="h-8">
-                        {expense.paidBy.id === userId && (
-                          <DeleteExpenseButton
-                            expenseId={expense.id}
-                          />
-                        )}
-                      </div>
-
-                      <span className="text-lg font-bold text-slate-700">
-                        ₹{expense.amount}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="mt-2 text-sm text-slate-500">
-                    Paid by{" "}
-                    <span className="font-medium text-slate-700">
-                      {expense.paidBy.username}
-                    </span>
-                    {" "}on {" "}
-                    <span className="font-medium text-slate-700">
-                      {new Intl.DateTimeFormat("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      }).format(expense.createdAt)}
-                      {" at "}
-                      {new Intl.DateTimeFormat("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }).format(expense.createdAt)}
-                    </span>
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {expense.participants.map(
-                      (participant) => (
-                        <span
-                          key={participant.user.id}
-                          className="rounded-full bg-slate-100 px-3 py-1 text-xs"
-                        >
-                          {participant.user.username}
-                        </span>
-                      )
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ExpensesList
+          groupId={groupId}
+          userId={userId}
+          initialData={expensesData}
+        />
 
         {/* Settlements */}
         <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -287,7 +213,7 @@ export default async function GroupPage({
         </div>
       </div>
     );
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     throw err;
   }

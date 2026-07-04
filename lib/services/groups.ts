@@ -102,8 +102,10 @@ export async function getGroup(
 
 export async function getGroupExpenses(
   groupId: string,
-  userId: string
+  userId: string,
+  cursor?: string
 ) {
+
   const membership = await prisma.groupMember.findUnique({
     where: {
       userId_groupId: {
@@ -117,7 +119,9 @@ export async function getGroupExpenses(
     throw new Error("Forbidden");
   }
 
-  return prisma.expense.findMany({
+  const PAGE_SIZE = 5;
+
+  const expenses = await prisma.expense.findMany({
     where: {
       groupId,
     },
@@ -142,8 +146,34 @@ export async function getGroupExpenses(
     orderBy: {
       createdAt: "desc",
     },
+    take: PAGE_SIZE + 1,
+
+    ...(cursor && {
+      cursor: {
+        id: cursor
+      },
+      skip: 1,
+    })
   });
+
+  const hasMore = expenses.length > PAGE_SIZE;
+
+  if(hasMore) {
+    expenses.pop()
+  }
+
+  const nextCursor = hasMore ? expenses[expenses.length - 1].id : null;
+
+  return {
+    expenses,
+    hasMore,
+    nextCursor
+  }
 }
+
+export type GetGroupExpensesResponse = Awaited<
+  ReturnType<typeof getGroupExpenses>
+>;
 
 export async function getGroupBalances(groupId: string, userId: string) {
   const membership = await prisma.groupMember.findUnique({
