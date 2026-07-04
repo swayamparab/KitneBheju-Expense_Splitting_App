@@ -80,16 +80,6 @@ export default async function GroupPage({
 
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">
-              Expenses
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-slate-800">
-              {expensesData.expenses.length}
-            </h2>
-          </div>
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">
               Owner
             </p>
 
