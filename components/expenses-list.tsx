@@ -1,48 +1,55 @@
 "use client";
 
 import type { GetGroupExpensesResponse } from "@/lib/types/group";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import DeleteExpenseButton from "./delete-expense-button";
 
 type ExpensesListProps = {
-    groupId: string,
-    userId: string,
-    initialData: GetGroupExpensesResponse
+  groupId: string,
+  userId: string,
+  initialData: GetGroupExpensesResponse
 }
 
-export default function ExpensesList({groupId, userId, initialData}: ExpensesListProps) {
-    
-    const [expenses, setExpenses] = useState(initialData.expenses);
-    const [hasMore, setHasMore] = useState(initialData.hasMore)
-    const [nextCursor, setNextCursor] = useState(initialData.nextCursor)
-    const [loading, setLoading] = useState(false)
+export default function ExpensesList({ groupId, userId, initialData }: ExpensesListProps) {
 
-    const handleLoadMore = async()=>{
-        if(!nextCursor || loading){
-            return
-        }
+  const [expenses, setExpenses] = useState(initialData.expenses);
+  const [hasMore, setHasMore] = useState(initialData.hasMore)
+  const [nextCursor, setNextCursor] = useState(initialData.nextCursor)
+  const [loading, setLoading] = useState(false)
 
-        setLoading(true);
 
-        try{
-            const res = await fetch(`/api/groups/${groupId}/expenses?cursor=${nextCursor}`)
+  useEffect(() => {
+    setExpenses(initialData.expenses);
+    setHasMore(initialData.hasMore);
+    setNextCursor(initialData.nextCursor);
+  }, [initialData]);
 
-            if(!res.ok){
-                throw new Error("Failed to load more expenses")
-            }
-
-            const data: GetGroupExpensesResponse = await res.json();
-
-            setExpenses((prev)=> [...prev, ...data.expenses])
-            setNextCursor(data.nextCursor)
-            setHasMore(data.hasMore);
-        }
-        finally{
-            setLoading(false)
-        }
+  const handleLoadMore = async () => {
+    if (!nextCursor || loading) {
+      return
     }
 
-    return (
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/groups/${groupId}/expenses?cursor=${nextCursor}`)
+
+      if (!res.ok) {
+        throw new Error("Failed to load more expenses")
+      }
+
+      const data: GetGroupExpensesResponse = await res.json();
+
+      setExpenses((prev) => [...prev, ...data.expenses])
+      setNextCursor(data.nextCursor)
+      setHasMore(data.hasMore);
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <h2 className="mb-6 text-2xl font-bold text-slate-800">
         Expenses
